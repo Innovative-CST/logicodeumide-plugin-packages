@@ -673,6 +673,10 @@ if [[ "${TERMUX_INSTALL_DEPS-false}" == "true" || "${TERMUX_PACKAGE_LIBRARY-bion
 		gpg --import "$TERMUX_SCRIPTDIR/packages/termux-keyring/termux-pacman.gpg"
 		gpg --no-tty --command-file <(echo -e "trust\n5\ny") --edit-key 998DE27318E867EA976BA877389CEED64573DFCA
 	}
+	gpg --list-keys F30DE1710DFD4D17D6F0D6093B079EBF136DBFE8 > /dev/null 2>&1 || {
+		gpg --import "$TERMUX_SCRIPTDIR/packages/termux-keyring/devkumar.gpg"
+		gpg --no-tty --command-file <(echo -e "trust\n5\ny") --edit-key F30DE1710DFD4D17D6F0D6093B079EBF136DBFE8
+	}
 fi
 
 for (( i=0; i < ${#PACKAGE_LIST[@]}; i++ )); do
