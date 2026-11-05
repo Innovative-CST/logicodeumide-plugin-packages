@@ -28,6 +28,11 @@ on:
           - arm
           - i686
           - x86_64
+      install:
+        description: "Enable package installation (-I)"
+        required: false
+        type: boolean
+        default: false
 
 permissions: {} # none
 
@@ -319,7 +324,11 @@ jobs:
         echo "packages: ${packages[*]}"
 
         if [[ "${#packages[@]}" -gt 0 ]]; then
-          ./scripts/run-docker.sh -d ./build-package.sh -I -C -a "${{ matrix.target_arch }}" "${packages[@]}"
+          INSTALL_FLAG=""
+          if [[ "${{ inputs.install }}" == "true" ]]; then
+              INSTALL_FLAG="-I"
+          fi
+          ./scripts/run-docker.sh -d ./build-package.sh $INSTALL_FLAG -C -a "${{ matrix.target_arch }}" "${packages[@]}"
         fi
 
     - name: Generate build artifacts
