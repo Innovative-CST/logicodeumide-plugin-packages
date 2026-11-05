@@ -429,6 +429,7 @@ jobs:
         cd debfiles
         git config user.name "$GITHUB_ACTOR"
         git config user.email "${GITHUB_ACTOR_ID}+${GITHUB_ACTOR}@users.noreply.github.com"
+        git lfs untrack "*.deb"
         git add .
         git commit -m "upload deb files for ${{ github.event.inputs.packages}}"
         git push origin main -f
