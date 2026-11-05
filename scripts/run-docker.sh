@@ -92,7 +92,7 @@ if [ "$UNAME" = Darwin ]; then
 	SEC_OPT=""
 else
 	REPOROOT="$(dirname $(readlink -f $0))/../"
-	SEC_OPT=" --security-opt seccomp=$REPOROOT/scripts/profile.json --security-opt apparmor=_custom-termux-package-builder-$CONTAINER_NAME --cap-add CAP_SYS_ADMIN --device /dev/fuse"
+	SEC_OPT=" --privileged --security-opt seccomp=unconfined --cap-add CAP_SYS_ADMIN --device /dev/fuse"
 fi
 
 if [ "${CI:-}" = "true" ]; then
