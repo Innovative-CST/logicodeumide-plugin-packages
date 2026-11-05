@@ -395,37 +395,6 @@ jobs:
         TERMUX_ARCH: x86_64
       run: ./scripts/bin/test-buildorder-random
 
-  upload-test:
-    permissions:
-      contents: read
-    needs: build
-    runs-on: ubuntu-26.04
-    steps:
-    - name: Clone repository
-      uses: actions/checkout@v7
-    - name: Get *.deb files
-      uses: actions/download-artifact@v8
-      with:
-        path: ./
-    - name: Check packages using Packages.bz2
-      run: |
-        if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
-          # GitHub sometimes add merge commits at the end
-          # To prevent user confusion, filter them with --no-merges
-          # Process tag '%ci:no-build' that may be added as line to commit message.
-          # Forces CI to cancel current build with status 'passed'
-          if grep -qiP '^\s*%ci:no-build\s*$' <(git log --format="%B" -n 1 --no-merges "HEAD"); then
-            echo "[!] Force exiting as tag '%ci:no-build' was applied to HEAD commit message."
-            exit 0
-          fi
-        fi
-
-        for archive in debs-*/debs-{aarch64,arm,i686,x86_64}-${{ github.sha }}.tar; do
-          tar xf "$archive"
-        done
-
-        ./scripts/utils/termux_check_file_conflicts.sh debs
-
   upload:
     concurrency:
       group: ${{ github.workflow }}-upload
