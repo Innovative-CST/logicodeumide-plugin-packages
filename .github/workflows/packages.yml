@@ -438,7 +438,39 @@ jobs:
         cd debfiles
         git config user.name "$GITHUB_ACTOR"
         git config user.email "${GITHUB_ACTOR_ID}+${GITHUB_ACTOR}@users.noreply.github.com"
+        # Identify modified and newly added files
+        git status --short
+
+        git status --short | awk '{print $NF}' | grep '\.deb$' > ../modified-debs.txt
+
+        echo "Modified deb files:"
+        cat ../modified-debs.txt
+
         git lfs untrack "*.deb"
         git add .
         git commit -m "upload deb files for ${{ github.event.inputs.packages}}"
         git push origin main -f
+    - name: Upload to server
+      run: |
+        mkdir -p upload/debs
+
+        while IFS= read -r file; do
+          [ -z "$file" ] && continue
+          cp "debfiles/$file" "upload/debs/"
+        done < modified-debs.txt
+
+        cp modified-debs.txt upload/
+
+        tar -czf packages.tar.gz -C upload .
+    - name: Upload modified packages
+      env:
+        SERVER_URL: http://aptly.amazemc.fun
+        ADMIN_TOKEN: ${{ secrets.APTLY_ADMIN_AUTH_TOKEN }}
+      run: |
+        curl -6 --fail-with-body \
+          --request PUT \
+          --url "$SERVER_URL/api/repository" \
+          --header "Authorization: Bearer $ADMIN_TOKEN" \
+          --header "Content-Type: application/gzip" \
+          --header "X-Commit-Message: upload deb files for ${{ github.event.inputs.packages}}" \
+          --data-binary "@packages.tar.gz"
